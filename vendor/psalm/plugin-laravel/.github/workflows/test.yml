@@ -1,0 +1,36 @@
+name: Run Tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [7.3, 7.4]
+        illuminate_version: [6.*, 8.*]
+        composer_flags:  ['', '--prefer-lowest']
+
+    name: PHP ${{ matrix.php }} | Illuminate ${{ matrix.illuminate_version }} | Composer Flags ${{ matrix.composer_flags }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        coverage: none
+        tools: composer:v2
+
+    - name: Install dependencies
+      run: |
+        composer require "illuminate/container:${{ matrix.illuminate_version }}" "illuminate/contracts:${{ matrix.illuminate_version }}" "illuminate/database:${{ matrix.illuminate_version }}" "illuminate/http:${{ matrix.illuminate_version }}" "illuminate/support:${{ matrix.illuminate_version }}" --no-interaction --no-progress --prefer-dist ${{ matrix.composer_flags }}
+
+    - name: Run Tests
+      run: composer test

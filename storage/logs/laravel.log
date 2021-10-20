@@ -1,0 +1,10 @@
+[2021-10-20 12:15:04] local.ERROR: There are no commands defined in the "passport" namespace. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\NamespaceNotFoundException(code: 0): There are no commands defined in the \"passport\" namespace. at C:\\Users\\geniu\\Documents\\TNC County Assembly\\officelife-main\\officelife-main\\vendor\\symfony\\console\\Application.php:612)
+[stacktrace]
+#0 C:\\Users\\geniu\\Documents\\TNC County Assembly\\officelife-main\\officelife-main\\vendor\\symfony\\console\\Application.php(663): Symfony\\Component\\Console\\Application->findNamespace('passport')
+#1 C:\\Users\\geniu\\Documents\\TNC County Assembly\\officelife-main\\officelife-main\\vendor\\symfony\\console\\Application.php(255): Symfony\\Component\\Console\\Application->find('passport:instal...')
+#2 C:\\Users\\geniu\\Documents\\TNC County Assembly\\officelife-main\\officelife-main\\vendor\\symfony\\console\\Application.php(167): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 C:\\Users\\geniu\\Documents\\TNC County Assembly\\officelife-main\\officelife-main\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(94): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 C:\\Users\\geniu\\Documents\\TNC County Assembly\\officelife-main\\officelife-main\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(129): Illuminate\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#5 C:\\Users\\geniu\\Documents\\TNC County Assembly\\officelife-main\\officelife-main\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#6 {main}
+"} 

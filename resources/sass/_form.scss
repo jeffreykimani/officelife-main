@@ -1,0 +1,41 @@
+input[type='text'],
+input[type='email'],
+input[type='password'],
+textarea {
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus,
+  &:active {
+    background-color: #fff;
+    border-color: #346cb0;
+    outline: 0;
+    box-shadow: 0 0 0 1px #346cb0;
+  }
+
+  &:empty {
+    background-color: #fbfbfd;
+  }
+
+  &.error {
+    border-color: #ea241e;
+    border-width: 2px;
+  }
+}
+
+label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+// specific to tiptap
+.ProseMirror {
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  &:focus {
+    background-color: #fff;
+    border-color: #346cb0;
+    outline: 0;
+    box-shadow: 0 0 0 1px #346cb0;
+  }
+}
