@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NunoMaduro\Larastan\Properties;
 
+use Illuminate\Support\Str;
 use PhpParser;
 use PhpParser\NodeFinder;
 
@@ -16,7 +17,7 @@ final class SchemaAggregator
     public $tables = [];
 
     /**
-     * @param array<int, PhpParser\Node\Stmt> $stmts
+     * @param  array<int, PhpParser\Node\Stmt>  $stmts
      */
     public function addStatements(array $stmts): void
     {
@@ -31,7 +32,7 @@ final class SchemaAggregator
     }
 
     /**
-     * @param array<int, PhpParser\Node\Stmt> $stmts
+     * @param  array<int, PhpParser\Node\Stmt>  $stmts
      */
     private function addClassStatements(array $stmts): void
     {
@@ -46,7 +47,7 @@ final class SchemaAggregator
     }
 
     /**
-     * @param PhpParser\Node\Stmt[] $stmts
+     * @param  PhpParser\Node\Stmt[]  $stmts
      */
     private function addUpMethodStatements(array $stmts): void
     {
@@ -117,9 +118,9 @@ final class SchemaAggregator
     }
 
     /**
-     * @param string                $tableName
-     * @param string                $argName
-     * @param PhpParser\Node\Stmt[] $stmts
+     * @param  string  $tableName
+     * @param  string  $argName
+     * @param  PhpParser\Node\Stmt[]  $stmts
      *
      * @throws \Exception
      */
@@ -159,6 +160,27 @@ final class SchemaAggregator
                 ) {
                     $firstArg = $firstMethodCall->args[0]->value ?? null;
                     $secondArg = $firstMethodCall->args[1]->value ?? null;
+
+                    if ($firstMethodCall->name->name === 'foreignIdFor') {
+                        if ($firstArg instanceof PhpParser\Node\Expr\ClassConstFetch
+                            && $firstArg->class instanceof PhpParser\Node\Name
+                        ) {
+                            $modelClass = $firstArg->class->toCodeString();
+                        } elseif ($firstArg instanceof PhpParser\Node\Scalar\String_) {
+                            $modelClass = $firstArg->value;
+                        } else {
+                            continue;
+                        }
+
+                        $columnName = Str::snake(class_basename($modelClass)).'_id';
+                        if ($secondArg instanceof PhpParser\Node\Scalar\String_) {
+                            $columnName = $secondArg->value;
+                        }
+
+                        $table->setColumn(new SchemaColumn($columnName, 'int', $nullable));
+
+                        continue;
+                    }
 
                     if (! $firstArg instanceof PhpParser\Node\Scalar\String_) {
                         if ($firstMethodCall->name->name === 'timestamps'

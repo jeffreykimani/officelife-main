@@ -22,6 +22,8 @@ class ComposerAutoloaderInit21918a381abd694b678f66b5bdd4b54c
             return self::$loader;
         }
 
+        require __DIR__ . '/platform_check.php';
+
         spl_autoload_register(array('ComposerAutoloaderInit21918a381abd694b678f66b5bdd4b54c', 'loadClassLoader'), true, true);
         self::$loader = $loader = new \Composer\Autoload\ClassLoader(\dirname(\dirname(__FILE__)));
         spl_autoload_unregister(array('ComposerAutoloaderInit21918a381abd694b678f66b5bdd4b54c', 'loadClassLoader'));
@@ -48,7 +50,7 @@ class ComposerAutoloaderInit21918a381abd694b678f66b5bdd4b54c
             }
         }
 
-        $loader->setApcuPrefix('Uo1F1RZ0IOBbDyRmJlYaC');
+        $loader->setApcuPrefix('9RkpJlfmzXfgyEiSFjEkd');
         $loader->register(true);
 
         if ($useStaticLoader) {

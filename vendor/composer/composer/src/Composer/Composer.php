@@ -51,10 +51,10 @@ class Composer
      * const RELEASE_DATE = '@release_date@';
      * const SOURCE_VERSION = '1.8-dev+source';
      */
-    const VERSION = '2.1.9';
-    const BRANCH_ALIAS_VERSION = '';
-    const RELEASE_DATE = '2021-10-05 09:47:38';
-    const SOURCE_VERSION = '';
+    const VERSION = '@package_version@';
+    const BRANCH_ALIAS_VERSION = '@package_branch_alias_version@';
+    const RELEASE_DATE = '@release_date@';
+    const SOURCE_VERSION = '2.1.999-dev+source';
 
     /**
      * Version number of the internal composer-runtime-api package
@@ -67,6 +67,9 @@ class Composer
      */
     const RUNTIME_API_VERSION = '2.1.0';
 
+    /**
+     * @return string
+     */
     public static function getVersion()
     {
         // no replacement done, this must be a source checkout

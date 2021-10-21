@@ -20,8 +20,9 @@ use Composer\Util\Filesystem;
  */
 class ZipArchiver implements ArchiverInterface
 {
+    /** @var array<string, bool> */
     protected static $formats = array(
-        'zip' => 1,
+        'zip' => true,
     );
 
     /**
@@ -83,6 +84,9 @@ class ZipArchiver implements ArchiverInterface
         return isset(static::$formats[$format]) && $this->compressionAvailable();
     }
 
+    /**
+     * @return bool
+     */
     private function compressionAvailable()
     {
         return class_exists('ZipArchive');

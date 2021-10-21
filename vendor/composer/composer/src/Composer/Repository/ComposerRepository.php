@@ -91,9 +91,9 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
     private $allowSslDowngrade = false;
     /** @var ?EventDispatcher */
     private $eventDispatcher;
-    /** @var ?array<string, array{url: string, preferred: bool}> */
+    /** @var ?array<string, array<int, array{url: string, preferred: bool}>> */
     private $sourceMirrors;
-    /** @var ?array<string, array{url: string, preferred: bool}> */
+    /** @var ?array<int, array{url: string, preferred: bool}> */
     private $distMirrors;
     /** @var bool */
     private $degradedMode = false;
@@ -1038,8 +1038,10 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
         // legacy repo handling
         if (!isset($data['packages']) && !isset($data['includes'])) {
             foreach ($data as $pkg) {
-                foreach ($pkg['versions'] as $metadata) {
-                    $packages[] = $metadata;
+                if (isset($pkg['versions']) && is_array($pkg['versions'])) {
+                    foreach ($pkg['versions'] as $metadata) {
+                        $packages[] = $metadata;
+                    }
                 }
             }
 

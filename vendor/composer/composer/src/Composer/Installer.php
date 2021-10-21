@@ -66,6 +66,13 @@ use Composer\Util\Platform;
  */
 class Installer
 {
+    const ERROR_NONE = 0; // no error/success state
+    const ERROR_GENERIC_FAILURE = 1;
+    const ERROR_NO_LOCK_FILE_FOR_PARTIAL_UPDATE = 3;
+    const ERROR_LOCK_FILE_INVALID = 4;
+    // used/declared in SolverProblemsException, carried over here for completeness
+    const ERROR_DEPENDENCY_RESOLUTION_FAILED = 2;
+
     /**
      * @var IOInterface
      */
@@ -77,13 +84,13 @@ class Installer
     protected $config;
 
     /**
-     * @var RootPackageInterface
+     * @var RootPackageInterface&BasePackage
      */
     protected $package;
 
     // TODO can we get rid of the below and just use the package itself?
     /**
-     * @var RootPackageInterface
+     * @var RootPackageInterface&BasePackage
      */
     protected $fixedRootPackage;
 
@@ -117,23 +124,41 @@ class Installer
      */
     protected $autoloadGenerator;
 
+    /** @var bool */
     protected $preferSource = false;
+    /** @var bool */
     protected $preferDist = false;
+    /** @var bool */
     protected $optimizeAutoloader = false;
+    /** @var bool */
     protected $classMapAuthoritative = false;
+    /** @var bool */
     protected $apcuAutoloader = false;
-    protected $apcuAutoloaderPrefix;
+    /** @var string|null */
+    protected $apcuAutoloaderPrefix = null;
+    /** @var bool */
     protected $devMode = false;
+    /** @var bool */
     protected $dryRun = false;
+    /** @var bool */
     protected $verbose = false;
+    /** @var bool */
     protected $update = false;
+    /** @var bool */
     protected $install = true;
+    /** @var bool */
     protected $dumpAutoloader = true;
+    /** @var bool */
     protected $runScripts = true;
+    /** @var bool|string[] */
     protected $ignorePlatformReqs = false;
+    /** @var bool */
     protected $preferStable = false;
+    /** @var bool */
     protected $preferLowest = false;
+    /** @var bool */
     protected $writeLock;
+    /** @var bool */
     protected $executeOperations = true;
 
     /** @var bool */
@@ -141,9 +166,10 @@ class Installer
     /**
      * Array of package names/globs flagged for update
      *
-     * @var array|null
+     * @var string[]|null
      */
     protected $updateAllowList = null;
+    /** @var Request::UPDATE_* */
     protected $updateAllowTransitiveDependencies = Request::UPDATE_ONLY_LISTED;
 
     /**
@@ -161,7 +187,7 @@ class Installer
      *
      * @param IOInterface          $io
      * @param Config               $config
-     * @param RootPackageInterface $package
+     * @param RootPackageInterface&BasePackage $package
      * @param DownloadManager      $downloadManager
      * @param RepositoryManager    $repositoryManager
      * @param Locker               $locker
@@ -190,6 +216,7 @@ class Installer
      *
      * @throws \Exception
      * @return int        0 on success or a positive error code on failure
+     * @phpstan-return self::ERROR_*
      */
     public function run()
     {
@@ -368,7 +395,7 @@ class Installer
         if (($this->updateAllowList || $this->updateMirrors) && !$lockedRepository) {
             $this->io->writeError('<error>Cannot update ' . ($this->updateMirrors ? 'lock file information' : 'only a partial set of packages') . ' without a lock file present. Run `composer update` to generate a lock file.</error>', true, IOInterface::QUIET);
 
-            return 1;
+            return self::ERROR_NO_LOCK_FILE_FOR_PARTIAL_UPDATE;
         }
 
         $this->io->writeError('<info>Loading composer repositories with package information</info>');
@@ -415,7 +442,7 @@ class Installer
             $ghe = new GithubActionError($this->io);
             $ghe->emit($err."\n".$prettyProblem);
 
-            return max(1, $e->getCode());
+            return max(self::ERROR_GENERIC_FAILURE, $e->getCode());
         }
 
         $this->io->writeError("Analyzed ".count($pool)." packages to resolve dependencies", true, IOInterface::VERBOSE);
@@ -584,7 +611,7 @@ class Installer
             $ghe = new GithubActionError($this->io);
             $ghe->emit($err."\n".$prettyProblem);
 
-            return max(1, $e->getCode());
+            return max(self::ERROR_GENERIC_FAILURE, $e->getCode());
         }
 
         $lockTransaction->setNonDevPackages($nonDevLockTransaction);
@@ -642,7 +669,7 @@ class Installer
                 if (0 !== count($lockTransaction->getOperations())) {
                     $this->io->writeError('<error>Your lock file cannot be installed on this system without changes. Please run composer update.</error>', true, IOInterface::QUIET);
 
-                    return 1;
+                    return self::ERROR_LOCK_FILE_INVALID;
                 }
             } catch (SolverProblemsException $e) {
                 $err = 'Your lock file does not contain a compatible set of packages. Please run composer update.';
@@ -654,7 +681,7 @@ class Installer
                 $ghe = new GithubActionError($this->io);
                 $ghe->emit($err."\n".$prettyProblem);
 
-                return max(1, $e->getCode());
+                return max(self::ERROR_GENERIC_FAILURE, $e->getCode());
             }
         }
 
@@ -818,6 +845,7 @@ class Installer
     }
 
     /**
+     * @param RootPackageInterface&BasePackage $rootPackage
      * @return Request
      */
     private function createRequest(RootPackageInterface $rootPackage, PlatformRepository $platformRepo, LockArrayRepository $lockedRepository = null)

@@ -20,6 +20,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Composer\Factory;
 use Composer\Installer;
+use Composer\Installer\InstallerEvents;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonManipulator;
 use Composer\Package\Version\VersionParser;
@@ -52,6 +53,8 @@ class RequireCommand extends InitCommand
     private $lock;
     /** @var ?string contents before modification if the lock file exists */
     private $lockBackup;
+    /** @var bool */
+    private $dependencyResolutionCompleted = false;
 
     protected function configure()
     {
@@ -270,7 +273,9 @@ EOT
         try {
             return $this->doUpdate($input, $output, $io, $requirements, $requireKey, $removeKey);
         } catch (\Exception $e) {
-            $this->revertComposerFile(false);
+            if (!$this->dependencyResolutionCompleted) {
+                $this->revertComposerFile(false);
+            }
             throw $e;
         }
     }
@@ -311,12 +316,23 @@ EOT
         );
     }
 
+    /**
+     * @private
+     */
+    public function markSolverComplete()
+    {
+        $this->dependencyResolutionCompleted = true;
+    }
+
     private function doUpdate(InputInterface $input, OutputInterface $output, IOInterface $io, array $requirements, $requireKey, $removeKey)
     {
         // Update packages
         $this->resetComposer();
         $composer = $this->getComposer(true, $input->getOption('no-plugins'));
         $composer->getEventDispatcher()->setRunScripts(!$input->getOption('no-scripts'));
+
+        $this->dependencyResolutionCompleted = false;
+        $composer->getEventDispatcher()->addListener(InstallerEvents::PRE_OPERATIONS_EXEC, array($this, 'markSolverComplete'), 10000);
 
         if ($input->getOption('dry-run')) {
             $rootPackage = $composer->getPackage();
@@ -387,12 +403,23 @@ EOT
 
         $status = $install->run();
         if ($status !== 0) {
+            if ($status === Installer::ERROR_DEPENDENCY_RESOLUTION_FAILED) {
+                foreach ($this->normalizeRequirements($input->getArgument('packages')) as $req) {
+                    if (!isset($req['version'])) {
+                        $io->writeError('You can also try re-running composer require with an explicit version constraint, e.g. "composer require '.$req['name'].':*" to figure out if any version is installable, or "composer require '.$req['name'].':^2.1" if you know which you need.');
+                        break;
+                    }
+                }
+            }
             $this->revertComposerFile(false);
         }
 
         return $status;
     }
 
+    /**
+     * @return bool
+     */
     private function updateFileCleanly($json, array $new, $requireKey, $removeKey, $sortPackages)
     {
         $contents = file_get_contents($json->getPath());

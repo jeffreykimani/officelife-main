@@ -71,7 +71,7 @@ class Collection implements \ArrayAccess, Enumerable
 
     /**
      * @param callable(TValue, TKey): array<mixed> $callback
-     * @return static<mixed, mixed>
+     * @return static<mixed, static<mixed>>
      */
     public function mapToGroups(callable $callback) {}
 
@@ -83,14 +83,16 @@ class Collection implements \ArrayAccess, Enumerable
     public function mapInto($class);
 
     /**
-     * @param callable(TValue, TKey): mixed $callback
-     * @return static<mixed, mixed>
+     * @template TReturn
+     * @param callable(TValue, TKey): array<TReturn> $callback
+     * @return static<TKey, TReturn>
      */
     public function flatMap(callable $callback) {}
 
     /**
-     * @param callable $callback
-     * @return static<int, mixed>
+     * @template TReturn
+     * @param callable(TValue ...$values): TReturn $callback
+     * @return static<int, TReturn>
      */
     public function mapSpread(callable $callback) {}
 
@@ -107,4 +109,26 @@ class Collection implements \ArrayAccess, Enumerable
      * @return static<int, mixed>
      */
     public function pluck($value, $key = null) {}
+
+    /**
+     * @return TValue
+     */
+    public function pop() {}
+
+    /**
+     * Push one or more items onto the end of the collection.
+     *
+     * @param TValue ...$values
+     * @return static
+     */
+    public function push(...$values) {}
+
+    /**
+     * Put an item in the collection by key.
+     *
+     * @param TKey $key
+     * @param TValue $value
+     * @return static
+     */
+    public function put($key, $value) {}
 }

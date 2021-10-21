@@ -25,6 +25,7 @@ class Config
 {
     const RELATIVE_PATHS = 1;
 
+    /** @var array<string, mixed> */
     public static $defaultConfig = array(
         'process-timeout' => 300,
         'use-include-path' => false,
@@ -77,6 +78,7 @@ class Config
         // bearer
     );
 
+    /** @var array<string, mixed> */
     public static $defaultRepositories = array(
         'packagist.org' => array(
             'type' => 'composer',
@@ -84,14 +86,19 @@ class Config
         ),
     );
 
+    /** @var array<string, mixed> */
     private $config;
+    /** @var ?string */
     private $baseDir;
+    /** @var array<int|string, mixed> */
     private $repositories;
     /** @var ConfigSourceInterface */
     private $configSource;
     /** @var ConfigSourceInterface */
     private $authConfigSource;
+    /** @var bool */
     private $useEnvironment;
+    /** @var array<string, true> */
     private $warnedHosts = array();
 
     /**
@@ -112,6 +119,9 @@ class Config
         $this->configSource = $source;
     }
 
+    /**
+     * @return ConfigSourceInterface
+     */
     public function getConfigSource()
     {
         return $this->configSource;
@@ -122,6 +132,9 @@ class Config
         $this->authConfigSource = $source;
     }
 
+    /**
+     * @return ConfigSourceInterface
+     */
     public function getAuthConfigSource()
     {
         return $this->authConfigSource;
@@ -366,6 +379,9 @@ class Config
         }
     }
 
+    /**
+     * @return array<string, mixed[]>
+     */
     public function all($flags = 0)
     {
         $all = array(
@@ -378,6 +394,9 @@ class Config
         return $all;
     }
 
+    /**
+     * @return array<string, mixed[]>
+     */
     public function raw()
     {
         return array(
